@@ -37,6 +37,8 @@ class CostumesArea(ctk.CTkFrame):
         self.offset_y = 0
         self.pan_start = None
 
+        self.default_brush_size = 25
+
         self.allow_overflow = True
         self.checker_image = None
         self.checker_size = (0, 0)
@@ -102,7 +104,7 @@ class CostumesArea(ctk.CTkFrame):
 
         self.brush_size_label = ctk.CTkLabel(right_panel, text="Brush Size")
         self.brush_size_label.pack(pady=(20, 2), padx=5)
-        self.brush_size = ctk.CTkEntry(right_panel, placeholder_text="50", width=50)
+        self.brush_size = ctk.CTkEntry(right_panel, placeholder_text=str(self.default_brush_size), width=50)
         self.brush_size.pack(padx=5)
         self.brush_size.bind("<KeyRelease>", self.validate_brush_size)
 
@@ -152,6 +154,14 @@ class CostumesArea(ctk.CTkFrame):
         self.overflow_switch.configure(text=get_text("costume.overflow"))
         self.reset_view_btn.configure(text=get_text("costume.reset_view"))
         self.checker_size = (0, 0)  # Reset checker size to force redraw
+
+    def _brush_size(self):
+        """Retourne la taille du pinceau"""
+        try:
+            raw_size = int(self.brush_size.get())
+        except ValueError:
+            raw_size = self.default_brush_size
+        return raw_size
 
     def _undo(self):
         self.sprite.history.undo()
@@ -313,13 +323,8 @@ class CostumesArea(ctk.CTkFrame):
             self.pan_start = None
 
     def _calculate_expansion(self, x, y):
-        try:
-            raw_size = int(self.brush_size.get())
-        except:
-            raw_size = 50
-
         # Rayon réel du brush
-        brush_radius = int(raw_size / self.zoom // 2)
+        brush_radius = int(self._brush_size() // 2)
 
         # Bordure de sécurité : on réserve toujours au moins brush_radius autour
         expand_x = max(0, x + brush_radius + 2 - self.sprite.image.width)
@@ -361,12 +366,7 @@ class CostumesArea(ctk.CTkFrame):
                 x,y = self._calculate_expansion(x, y)
 
             draw = ImageDraw.Draw(self.sprite.image)
-            try:
-                raw_size = int(self.brush_size.get())
-            except:
-                raw_size = 50
-
-            brush_size = max(1, int(raw_size / self.zoom))
+            brush_size = self._brush_size()
             color = self.brush_color if self.active_tool == "🖌️" else (0, 0, 0, 0)
 
             if self.last_x is not None and self.last_y is not None:
@@ -394,11 +394,7 @@ class CostumesArea(ctk.CTkFrame):
     def _draw_preview(self, widget):
         if self.active_tool in ["🖌️", "🧽"]:
             mx, my = widget.input.mouse_position()
-            try:
-                raw_size = int(self.brush_size.get())
-            except:
-                raw_size = 50
-            preview_size = int(raw_size)
+            preview_size = int(self._brush_size() * self.zoom)
             widget.surface.ellipse(
                 (
                     mx - preview_size // 2,
