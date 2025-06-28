@@ -1,0 +1,67 @@
+{
+  "menu": {
+    "file": {
+      "label": "File",
+      "new": "New Project",
+      "load": "Load Project",
+      "save": "Save Project"
+    },
+    "edit": {
+      "label": "Edit",
+      "soon": "Coming Soon"
+    },
+    "language": {
+      "label": "Language"
+    },
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "tabs": {
+    "code": "Code",
+    "costumes": "Costumes",
+    "sounds": "Sounds"
+  },
+  "gameobject": {
+    "name": "GameObject",
+    "name_placeholder": "Name",
+    "x": "x",
+    "y": "y",
+    "show": "Show",
+    "size": "Size",
+    "direction": "Direction"
+  },
+  "gameobjects": {
+    "add": "Add new GameObject",
+    "popup": {
+        "bring_forward": "Bring Forward",
+        "send_backward": "Send Backward",
+        "front": "Front",
+        "back": "Back",
+        "delete": "Delete",
+        "delete_confirm": {
+            "title": "Delete GameObject",
+            "message": "Are you sure you want to delete this GameObject?"
+        }
+    }
+  },
+  "stage": {
+    "label": "Stage",
+    "backdrops": "Backdrops"
+  },
+  "costume": {
+    "name": "Costume",
+    "name_placeholder": "Name",
+    "overflow": "Overflow",
+    "color": "Color",
+    "brush_size": "Brush Size",
+    "zoom": "Zoom",
+    "reset_view": "Reset View"
+  },
+  "sound": {
+    "name": "Sound",
+    "name_placeholder": "Name"
+  }
+}

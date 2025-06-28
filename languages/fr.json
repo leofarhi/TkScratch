@@ -1,0 +1,67 @@
+{
+  "menu": {
+    "file": {
+      "label": "Fichier",
+      "new": "Nouveau projet",
+      "load": "Charger le projet",
+      "save": "Sauvegarder le projet"
+    },
+    "edit": {
+      "label": "Édition",
+      "soon": "Bientôt disponible"
+    },
+    "language": {
+      "label": "Langue"
+    },
+    "theme": {
+      "label": "Thème",
+      "light": "Clair",
+      "dark": "Sombre"
+    }
+  },
+  "tabs": {
+    "code": "Code",
+    "costumes": "Costumes",
+    "sounds": "Sons"
+  },
+  "gameobject": {
+    "name": "GameObject",
+    "name_placeholder": "Nom",
+    "x": "x",
+    "y": "y",
+    "show": "Afficher",
+    "size": "Taille",
+    "direction": "Direction"
+  },
+  "gameobjects": {
+    "add": "Ajouter un nouveau GameObject",
+    "popup": {
+      "bring_forward": "Avancer",
+      "send_backward": "Reculer",
+      "front": "Premier plan",
+      "back": "Arrière-plan",
+      "delete": "Supprimer",
+      "delete_confirm": {
+            "title": "Supprimer le GameObject",
+            "message": "Êtes-vous sûr de vouloir supprimer ce GameObject ?"
+      }
+    }
+  },
+  "stage": {
+    "label": "Scène",
+    "backdrops": "Arrière-plans"
+  },
+  "costume": {
+    "name": "Costume",
+    "name_placeholder": "Nom",
+    "overflow": "Débordement",
+    "color": "Couleur",
+    "brush_size": "Taille",
+    "zoom": "Zoom",
+    "reset_view": "Recentrer"
+  },
+  "sound": {
+    "name": "Son",
+    "name_placeholder": "Nom"
+  }
+}
