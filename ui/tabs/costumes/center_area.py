@@ -107,6 +107,9 @@ class CostumesArea(ctk.CTkFrame):
         self.brush_size = ctk.CTkEntry(right_panel, placeholder_text=str(self.default_brush_size), width=50)
         self.brush_size.pack(padx=5)
         self.brush_size.bind("<KeyRelease>", self.validate_brush_size)
+        self.brush_size.bind("<MouseWheel>", self._on_brush_scroll)  # Windows/macOS
+        self.brush_size.bind("<Button-4>", self._on_brush_scroll)    # Linux scroll up
+        self.brush_size.bind("<Button-5>", self._on_brush_scroll)    # Linux scroll down
 
         # === DRAWING AREA ===
         canvas_frame = ctk.CTkFrame(self)
@@ -248,6 +251,26 @@ class CostumesArea(ctk.CTkFrame):
         if not val.isdigit():
             self.brush_size.delete(0, "end")
             self.brush_size.insert(0, "10")
+
+    def _on_brush_scroll(self, event):
+        value = self._brush_size()
+        # Détection sens molette : Windows/macOS ou Linux
+        if hasattr(event, 'delta'):
+            if event.delta > 0:
+                value += 1
+            elif event.delta < 0:
+                value -= 1
+        else:
+            # Linux
+            if event.num == 4:
+                value += 1
+            elif event.num == 5:
+                value -= 1
+        # Clamp pour éviter < 1
+        if value < 1:
+            value = 1
+        self.brush_size.delete(0, "end")
+        self.brush_size.insert(0, str(value))
 
     def update_canvas(self, widget):
         if widget.input.mouse_is_inside() and widget.input.is_mouse_down(1):
