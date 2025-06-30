@@ -73,7 +73,7 @@ class CostumesArea(ctk.CTkFrame):
         tools_frame = ctk.CTkFrame(self, width=60)
         tools_frame.pack(side="left", fill="y", padx=5, pady=5)
 
-        self.tools = ["🖌️", "🧽", "⏹", "⬤", "T", "⛶", "🧹", "✂️"]
+        self.tools = ["🧹", "🧽"]
         for t in self.tools:
             b = ctk.CTkButton(
                 tools_frame,
@@ -144,7 +144,7 @@ class CostumesArea(ctk.CTkFrame):
 
         self.compute_initial_zoom()
         self.check_if_can_undo_redo()
-        self.select_tool("🖌️")
+        self.select_tool("🧹")
         self.app.add_refresh(self.refresh)
 
     def refresh(self):
@@ -378,19 +378,19 @@ class CostumesArea(ctk.CTkFrame):
 
     def _handle_brush(self, widget):
         mx, my = widget.input.mouse_position()
-        if self.active_tool not in ["🖌️", "🧽"]:
+        if self.active_tool not in ["🧹", "🧽"]:
             return
 
         if widget.input.mouse_is_inside() and widget.input.is_mouse_pressed(1):
             x = int((mx - self.offset_x) / self.zoom)
             y = int((my - self.offset_y) / self.zoom)
 
-            if self.active_tool == "🖌️":
+            if self.active_tool == "🧹":
                 x,y = self._calculate_expansion(x, y)
 
             draw = ImageDraw.Draw(self.sprite.image)
             brush_size = self._brush_size()
-            color = self.brush_color if self.active_tool == "🖌️" else (0, 0, 0, 0)
+            color = self.brush_color if self.active_tool == "🧹" else (0, 0, 0, 0)
 
             if self.last_x is not None and self.last_y is not None:
                 dist = max(abs(x - self.last_x), abs(y - self.last_y))
@@ -415,7 +415,7 @@ class CostumesArea(ctk.CTkFrame):
             self.last_y = None
 
     def _draw_preview(self, widget):
-        if self.active_tool in ["🖌️", "🧽"]:
+        if self.active_tool in ["🧹", "🧽"]:
             mx, my = widget.input.mouse_position()
             preview_size = int(self._brush_size() * self.zoom)
             widget.surface.ellipse(

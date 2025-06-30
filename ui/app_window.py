@@ -7,11 +7,20 @@ from ui.info_area import InfoArea
 from ui.center_area import CenterArea
 from modules.i18n import LanguageManager
 from modules.config import Settings
+from engine.Project import Project
+
+from engine.GameObject import GameObject
+from engine.Sound import Sound
+from engine.Sprite import Sprite
+test_Project = Project()
+test_Project.add_game_object(GameObject("Sprite1", 100, 150))
+test_Project.add_game_object(GameObject("Sprite2", 200, 250))
 
 class ScratchApp(ctk.CTk):
     def __init__(self, settings : Settings, language_manager: LanguageManager):
         super().__init__()
         self.settings = settings
+        self.project = Project()
         self.language_manager = language_manager
         self.refresh_callbacks = []
 
