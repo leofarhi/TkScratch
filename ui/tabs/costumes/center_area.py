@@ -2,7 +2,7 @@ import customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk
 from tkinter import Canvas, colorchooser
 from ui.widgets.SmartCanvas import *
-from engine.Sprite import Sprite, random_sprite
+from engine.Sprite import Sprite
 
 def tk_color_to_hex(widget, color_name):
     """Prend un nom couleur (ex: 'gray86') et renvoie '#rrggbb'"""
@@ -24,11 +24,15 @@ def rgb_to_hex(rgb_color):
 
 
 class CostumesArea(ctk.CTkFrame):
+    Instance = None  # Pour accéder à l'instance depuis d'autres parties du code
     def __init__(self, app, master, **kwargs):
         super().__init__(master, **kwargs)
+        if CostumesArea.Instance is not None:
+            raise RuntimeError("CostumesArea ne peut être instancié qu'une seule fois.")
+        CostumesArea.Instance = self
         self.app = app
 
-        self.sprite = random_sprite()
+        self.sprite = None
         self.active_tool = None
         self.tool_buttons = []
         self.brush_color = "#000000"
@@ -146,6 +150,25 @@ class CostumesArea(ctk.CTkFrame):
         self.check_if_can_undo_redo()
         self.select_tool("🧹")
         self.app.add_refresh(self.refresh)
+        self.app.on_game_object_selected(self.on_game_object_selected)
+
+    def on_edit(self):
+        self.app.sidebar.tab_costumes.sync_widgets()
+
+    def on_game_object_selected(self, obj):
+        """Appelé lorsque l'objet de jeu change (nouveau sprite sélectionné)"""
+        if obj and obj.current_sprite is not None and 0 <= obj.current_sprite < len(obj.sprites):
+            self.on_sprite_select(obj.sprites[obj.current_sprite])
+        else:
+            self.sprite = None
+            self.check_if_can_undo_redo()
+
+    def on_sprite_select(self, sprite):
+        """Appelé lorsque le sprite change (nouveau costume, etc.)"""
+        self.sprite = sprite
+        self.compute_initial_zoom()
+        self.check_if_can_undo_redo()
+        self.checker_size = (0, 0)
 
     def refresh(self):
         get_text = self.app.language_manager.get
@@ -157,6 +180,7 @@ class CostumesArea(ctk.CTkFrame):
         self.overflow_switch.configure(text=get_text("costume.overflow"))
         self.reset_view_btn.configure(text=get_text("costume.reset_view"))
         self.checker_size = (0, 0)  # Reset checker size to force redraw
+        self.check_if_can_undo_redo()
 
     def _brush_size(self):
         """Retourne la taille du pinceau"""
@@ -167,17 +191,27 @@ class CostumesArea(ctk.CTkFrame):
         return raw_size
 
     def _undo(self):
+        if self.sprite is None or self.sprite.history is None:
+            return
         self.sprite.history.undo()
         self.compute_initial_zoom()
         self.check_if_can_undo_redo()
+        self.on_edit()
 
     def _redo(self):
+        if self.sprite is None or self.sprite.history is None:
+            return
         self.sprite.history.redo()
         self.compute_initial_zoom()
         self.check_if_can_undo_redo()
+        self.on_edit()
 
     def check_if_can_undo_redo(self):
         """Vérifie si on peut annuler ou refaire une action"""
+        if self.sprite is None or self.sprite.history is None:
+            self.undo_btn.configure(state="disabled")
+            self.redo_btn.configure(state="disabled")
+            return
         can_undo = self.sprite.history.can_undo()
         can_redo = self.sprite.history.can_redo()
         self.undo_btn.configure(state="normal" if can_undo else "disabled")
@@ -187,6 +221,11 @@ class CostumesArea(ctk.CTkFrame):
         self.allow_overflow = self.overflow_switch.get() == 1
 
     def compute_initial_zoom(self):
+        if self.sprite is None or self.sprite.image is None:
+            self.zoom = 1.0
+            self.offset_x = 0
+            self.offset_y = 0
+            return
         canvas_w = self.canvas.winfo_width()
         canvas_h = self.canvas.winfo_height()
         if canvas_w <= 1 or canvas_h <= 1:
@@ -273,6 +312,11 @@ class CostumesArea(ctk.CTkFrame):
         self.brush_size.insert(0, str(value))
 
     def update_canvas(self, widget):
+        if self.sprite is None or self.sprite.image is None:
+            mode = self.app._get_appearance_mode() == "dark"
+            widget.surface.fill(tk_color_to_hex(self, self.cget("bg_color")[int(mode)]))
+            widget.surface.display()
+            return
         if widget.input.mouse_is_inside() and widget.input.is_mouse_down(1):
             self.sprite.history.push()
             self.check_if_can_undo_redo()
@@ -285,6 +329,8 @@ class CostumesArea(ctk.CTkFrame):
         self._draw_preview(widget)
         self._update_labels(widget)
         widget.surface.display()
+        if widget.input.mouse_is_inside() and widget.input.is_mouse_up(1):
+            self.on_edit()
 
 
     def _handle_scroll(self, widget):

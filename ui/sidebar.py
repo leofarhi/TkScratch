@@ -21,12 +21,12 @@ class SideBar(ctk.CTkFrame):
         }
         self.tabs._segmented_button.configure(command=self._segmented_button_callback)
         # Add frames to the tabs
-        tab_code = CodeTab(self.app, self.tabs.tab("code"))
-        tab_code.pack(fill="both", expand=True)
-        tab_costumes = CostumesTab(self.app, self.tabs.tab("costumes"))
-        tab_costumes.pack(fill="both", expand=True)
-        tab_sounds = SoundsTab(self.app, self.tabs.tab("sounds"))
-        tab_sounds.pack(fill="both", expand=True)
+        self.tab_code = CodeTab(self.app, self.tabs.tab("code"))
+        self.tab_code.pack(fill="both", expand=True)
+        self.tab_costumes = CostumesTab(self.app, self.tabs.tab("costumes"))
+        self.tab_costumes.pack(fill="both", expand=True)
+        self.tab_sounds = SoundsTab(self.app, self.tabs.tab("sounds"))
+        self.tab_sounds.pack(fill="both", expand=True)
 
         self.app.add_refresh(self.refresh)
 

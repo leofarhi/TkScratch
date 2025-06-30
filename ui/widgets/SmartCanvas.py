@@ -144,6 +144,9 @@ class CanvasDrawer:
     def display(self):
         self._tk_image.paste(self._image)
 
+    def fill(self, color):
+        self._draw.rectangle((0, 0, self._image.width, self._image.height), fill=color)
+
     # Redirection vers les méthodes de dessin
     def __getattr__(self, name):
         return getattr(self._draw, name)

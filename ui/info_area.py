@@ -191,6 +191,14 @@ class InfoArea(ctk.CTkFrame):
         add_stage_btn = ctk.CTkButton(stage_frame, text="＋", width=40)
         add_stage_btn.pack(pady=10)
 
+    def set_current_object(self, obj, item=None):
+        self.app.set_current_object(obj)
+        self.refresh_fields()
+        if item:
+            self.set_selected_item(item)
+        else:
+            self.refresh_gameobject_list()
+
     def refresh_gameobject_list(self):
         for widget in self.scrollable_gameobjects.winfo_children():
             widget.destroy()
@@ -210,9 +218,7 @@ class InfoArea(ctk.CTkFrame):
             item._linked_object = obj
 
             def on_click(o=obj, i=item):
-                self.app.project.current_object = o
-                self.refresh_fields()
-                self.set_selected_item(i)
+                self.set_current_object(o, i)
 
             item.bind("<Button-1>", lambda e, o=obj, i=item: on_click(o, i))
             label_icon.bind("<Button-1>", lambda e, o=obj, i=item: on_click(o, i))
@@ -290,9 +296,8 @@ class InfoArea(ctk.CTkFrame):
             if tk.messagebox.askyesno(get_text("gameobjects.popup.delete_confirm.title"), get_text("gameobjects.popup.delete_confirm.message")):
                 item.focus_force()
                 self.app.project.remove_game_object(obj)
-                self.app.project.current_object = self.app.project.game_objects[-1] if len(self.app.project.game_objects) > 0 else None
-                self.refresh_gameobject_list()
-                self.refresh_fields()
+                next = self.app.project.game_objects[-1] if len(self.app.project.game_objects) > 0 else None
+                self.set_current_object(next)
 
         actions = [
             ("gameobjects.popup.bring_forward", make_command("gameobjects.popup.bring_forward")),

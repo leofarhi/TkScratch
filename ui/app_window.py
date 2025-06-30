@@ -9,20 +9,46 @@ from modules.i18n import LanguageManager
 from modules.config import Settings
 from engine.Project import Project
 
+############### TEST ###############
 from engine.GameObject import GameObject
 from engine.Sound import Sound
 from engine.Sprite import Sprite
+
 test_Project = Project()
 test_Project.add_game_object(GameObject("Sprite1", 100, 150))
 test_Project.add_game_object(GameObject("Sprite2", 200, 250))
+
+
+import random
+import string
+from PIL import Image, ImageDraw
+
+def random_sprite():
+    w, h = random.randint(200, 400), random.randint(200, 400)
+    color = tuple(random.randint(0, 255) for _ in range(3)) + (255,)
+    name = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+    image = Image.new("RGBA", (w, h), color)
+    draw = ImageDraw.Draw(image)
+    draw.text((w//4, h//4), "🐱", fill=(255, 255, 255, 255))
+
+    sprite = Sprite(name, image)
+    return sprite
+
+test_Project.game_objects[0].sprites.append(random_sprite())
+test_Project.game_objects[0].sprites.append(random_sprite())
+test_Project.game_objects[1].sprites.append(random_sprite())
+test_Project.game_objects[1].sprites.append(random_sprite())
+####################################
 
 class ScratchApp(ctk.CTk):
     def __init__(self, settings : Settings, language_manager: LanguageManager):
         super().__init__()
         self.settings = settings
-        self.project = Project()
+        self.project = test_Project#Project()
         self.language_manager = language_manager
         self.refresh_callbacks = []
+        self.on_game_object_selected_callbacks = []
 
         ctk.set_appearance_mode(settings.get("theme"))
         ctk.set_default_color_theme("blue")
@@ -64,6 +90,7 @@ class ScratchApp(ctk.CTk):
         self.info_area.pack(side="bottom", fill="both", expand=True)
 
         self.refresh()
+        self.set_current_object(self.project.game_objects[0])
         return
 
     def refresh(self):
@@ -72,3 +99,11 @@ class ScratchApp(ctk.CTk):
 
     def add_refresh(self, callback):
         self.refresh_callbacks.append(callback)
+
+    def on_game_object_selected(self, callback):
+        self.on_game_object_selected_callbacks.append(callback)
+
+    def set_current_object(self, obj: GameObject):
+        self.project.current_object = obj
+        for callback in self.on_game_object_selected_callbacks:
+            callback(obj)

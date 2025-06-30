@@ -3,16 +3,15 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageOps
 from functools import partial
-from engine.Sprite import Sprite, random_sprite
+from engine.Sprite import Sprite
+from ui.tabs.costumes.center_area import CostumesArea
 
 class CostumesTab(ctk.CTkFrame):
     def __init__(self, app, master, **kwargs):
         super().__init__(master, **kwargs)
         self.app = app
 
-        self.data_list = []   # Données réelles
         self.widget_list = []  # Widgets visibles
-        self.selected_index = None
 
         self.drag_data = {"index": None, "y": 0}
 
@@ -33,16 +32,38 @@ class CostumesTab(ctk.CTkFrame):
         )
         self.add_btn.pack(pady=15)
 
-        self.add_sprite()
-        self.add_sprite()
-
         self.app.add_refresh(self.sync_widgets)
+        self.app.on_game_object_selected(self.sync_widgets)
+
+    @property
+    def data_list(self):
+        obj = self.app.project.current_object
+        return obj.sprites if obj else []
+    
+    @property
+    def selected_index(self):
+        obj = self.app.project.current_object
+        if obj and 0 <= obj.current_sprite < len(obj.sprites):
+            return obj.current_sprite
+        obj.current_sprite = 0
+        return None
+    
+    @selected_index.setter
+    def selected_index(self, index):
+        obj = self.app.project.current_object
+        if obj and 0 <= index < len(obj.sprites):
+            obj.current_sprite = index
+            CostumesArea.Instance.on_sprite_select(obj.sprites[index])
+        else:
+            obj.current_sprite = 0
 
     def add_sprite(self):
-        sprite = random_sprite()#Sprite(f"costume{len(self.data_list)+1}", Image.new("RGBA", (64, 64), (255, 0, 0)))
-        self.data_list.append(sprite)
-        self.sync_widgets()
-        self.select_sprite(len(self.data_list)-1)
+        obj = self.app.project.current_object
+        if obj:
+            sprite = Sprite.create("New Costume", 100, 100, (255, 0, 0, 255)) # Créer un nouveau sprite par défaut
+            obj.sprites.append(sprite)
+            self.sync_widgets()
+            self.select_sprite(len(obj.sprites) - 1)
 
     def delete_sprite(self, index):
         if messagebox.askyesno("Confirm", f"Delete {self.data_list[index].name}?"):
@@ -53,7 +74,7 @@ class CostumesTab(ctk.CTkFrame):
             else:
                 self.selected_index = None
 
-    def sync_widgets(self):
+    def sync_widgets(self, *args, **kwargs):
         # Longueur : créer ou supprimer
         while len(self.widget_list) < len(self.data_list):
             w = self._create_sprite_widget(len(self.widget_list))
