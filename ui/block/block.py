@@ -87,7 +87,8 @@ class Block:
     def add_branch(self, branch):
         self.branches.append(branch)
 
-    def build_svg(self, config=None):
+    def build_svg(self):
+        config = [{"width": 50, "height": 28, "space": 28} for _ in range(len(self.shape))]
         if len(self.shape) == 0:
             raise ValueError("Block must have at least one shape")
         if self.shape[-1] not in [BlockShape.StackBottom, BlockShape.Cap, BlockShape.Reporter, BlockShape.Boolean]:

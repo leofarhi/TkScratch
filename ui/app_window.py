@@ -57,7 +57,7 @@ class ScratchApp(ctk.CTk):
         ctk.set_appearance_mode(settings.get("theme"))
         ctk.set_default_color_theme("blue")
 
-        self.title("Scratch Clone")
+        self.title("TkScratch")
         self.geometry("1600x900")
 
         # === CUSTOM MENU ===

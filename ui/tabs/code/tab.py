@@ -10,29 +10,29 @@ class DragPopup:
         self.master = master
         self.img = img
 
-        # Convertir en PhotoImage RGBA
         self.tk_img = ImageTk.PhotoImage(self.img)
 
-        # Créer la fenêtre popup
         self.popup = tk.Toplevel(master)
         self.popup.overrideredirect(True)
         self.popup.attributes('-topmost', True)
 
-        # Définir la couleur transparente pour Windows
         transparent_color = '#FF00FF'
         self.popup.config(bg=transparent_color)
         self.popup.wm_attributes('-transparentcolor', transparent_color)
 
-        # Créer le Label avec fond transparent
         self.label = tk.Label(self.popup, image=self.tk_img, bg=transparent_color, bd=0)
-        self.label.pack(padx=5, pady=5)
+        self.label.pack()
 
-    def move(self, x, y):
-        """Déplace le popup"""
-        self.popup.geometry(f"+{x}+{y}")
+        self.width = self.tk_img.width()+2  # Adding 2 for padding
+        self.height = self.tk_img.height()+ 2  # Adding 2 for padding
+
+    def move(self, x, y, offset_x=0, offset_y=0):
+        """Déplace le popup en conservant l'offset"""
+        new_x = x - offset_x
+        new_y = y - offset_y
+        self.popup.geometry(f"{self.width}x{self.height}+{new_x}+{new_y}")
 
     def destroy(self):
-        """Ferme le popup"""
         self.popup.destroy()
 
 
@@ -43,12 +43,13 @@ class CodeTab(ctk.CTkFrame):
 
         # ---- Drag state ----
         self.drag_popup = None
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
 
         # ---- TabView à gauche ----
         self.tabview = VerticalTabview(self)
         self.tabview.pack(fill="both", expand=True)
 
-        # ---- Onglets ----
         self.tabs = list(blocks_available.keys())
         self.scroll_frames = {}
 
@@ -76,10 +77,12 @@ class CodeTab(ctk.CTkFrame):
                     scroll,
                     text="",
                     image=block_img,
-                    compound="left",
                     fg_color="transparent",
                     hover=False,
                     cursor="hand2",
+                    border_spacing=0,
+                    border_width=0,
+                    corner_radius=0,
                 )
                 btn.pack(pady=5, anchor="w")
 
@@ -88,18 +91,23 @@ class CodeTab(ctk.CTkFrame):
                 btn.bind("<ButtonRelease-1>", self.stop_drag)
 
     def start_drag(self, event, img):
-        """Démarre le drag avec un vrai popup transparent"""
+        """Démarre le drag en calculant l'offset"""
         if img.mode != "RGBA":
             img = img.convert("RGBA")
         self.drag_popup = DragPopup(self.app, img)
+
+        # Calcul de l'offset clic → image
+        self.drag_offset_x = event.x
+        self.drag_offset_y = event.y
+
         self.do_drag(event)
 
     def do_drag(self, event):
-        """Déplace le popup"""
+        """Déplace le popup en tenant compte de l'offset"""
         if self.drag_popup:
             x = self.app.winfo_pointerx()
             y = self.app.winfo_pointery()
-            self.drag_popup.move(x, y)
+            self.drag_popup.move(x, y, self.drag_offset_x, self.drag_offset_y)
 
     def stop_drag(self, event):
         """Stoppe le drag"""
