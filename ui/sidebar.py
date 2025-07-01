@@ -3,14 +3,21 @@ from ui.tabs.code.tab import CodeTab
 from ui.tabs.costumes.tab import CostumesTab
 from ui.tabs.sounds.tab import SoundsTab
 
+def _set_grid_current_tab(self):
+    """ needs to be called for changes in corner_radius, border_width """
+    if self._anchor.lower() in ("center", "w", "nw", "n", "ne", "e", "e"):
+        self._tab_dict[self._current_name].grid(row=3, column=0, sticky="nsew")
+    else:
+        self._tab_dict[self._current_name].grid(row=0, column=0, sticky="nsew")
+
 class SideBar(ctk.CTkFrame):
     def __init__(self, app, master, **kwargs):
         super().__init__(master, **kwargs)
         self.app = app
-        get_text = lambda p: self.app.language_manager.get(p)
         self.pack_propagate(False)
         self.tabs = ctk.CTkTabview(self)
-        self.tabs.pack(fill="both", expand=True, padx=5, pady=5)
+        self.tabs._set_grid_current_tab = _set_grid_current_tab.__get__(self.tabs, ctk.CTkTabview)
+        self.tabs.pack(fill="both", expand=True)
         self.tabs.add("code")
         self.tabs.add("costumes")
         self.tabs.add("sounds")

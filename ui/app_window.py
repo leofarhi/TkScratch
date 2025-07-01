@@ -75,10 +75,10 @@ class ScratchApp(ctk.CTk):
 
         # === Bloc gauche (Tabview) ===
         self.sidebar = SideBar(self, self.main_paned, bg_color=ctk.ThemeManager.theme["CTkFrame"]["border_color"])
-        self.main_paned.add(self.sidebar, minsize=200)
+        self.main_paned.add(self.sidebar, minsize=200, width=800)
 
         self.center_area = CenterArea(self, self.main_paned, bg_color=ctk.ThemeManager.theme["CTkFrame"]["border_color"])
-        self.main_paned.add(self.center_area, minsize=300, width=2200)
+        self.main_paned.add(self.center_area, minsize=300, width=2000)
         
         # === Zone droite (scène + infos) ===
         self.rightside = ctk.CTkFrame(self.main_paned, bg_color=ctk.ThemeManager.theme["CTkFrame"]["border_color"])
