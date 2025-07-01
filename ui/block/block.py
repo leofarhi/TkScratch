@@ -28,32 +28,47 @@ base_config = {
 
 class BlockPartType(Enum):
     LABEL = "label"       # Texte statique
+    ICON = "icon"         # Icône (image)
     REPORTER = "reporter" # Slot pour valeur ou bloc
     BOOLEAN = "boolean"   # Slot pour condition
     DROPDOWN = "dropdown" # Liste déroulante
     INPUT = "input"       # Champ texte / nombre
 
 class Branch:
-    def __init__(self, name, top=None, body=None):
+    def __init__(self, name, top=None, next_block=None):
         self.name = name
         self.top = top or []
-        self.body = body or []
+        self.next_block = next_block
 
     def to_dict(self):
         return {
             "top": [(part.value, value) for part, value in self.top],
-            "body": [b.to_dict() for b in self.body]  # Si sous-blocs
+            "next_block": self.next_block
         }
+    
+    def clone(self):
+        top_copy = [(part, value if not isinstance(value, Block) else value.clone()) for part, value in self.top]
+        new_branch = Branch(self.name, top_copy, self.next_block.clone() if self.next_block else None)
+        return new_branch
 
 class Block:
-    def __init__(self, master):
+    def __init__(self, id, master):
         self.master = master
-        self.id = "control_ifelse"
+        self.id = id
         self.shape = []
         self.fill_color = "#ffab19"
         self.stroke_color = "#cf8b17"
         self.branches = []
         self.next_block = None
+
+    def clone(self):
+        new_block = Block(self.id, self.master)
+        new_block.shape = self.shape.copy()
+        new_block.fill_color = self.fill_color
+        new_block.stroke_color = self.stroke_color
+        new_block.branches = [branch.clone() for branch in self.branches]
+        new_block.next_block = self.next_block.clone() if self.next_block else None
+        return new_block
 
     def add_shape(self, shape):
         if not isinstance(shape, BlockShape):
@@ -100,13 +115,13 @@ class Block:
             fill_color=self.fill_color,
             border_color=self.stroke_color,
             stroke_width=2,
-            viewbox=ViewBox(0, 0, 2, 2),
+            viewbox=ViewBox(0, 0, 3, 3),
         ))
         return svg
 
-if True :#__name__ == "__main__":
+if __name__ == "__main__":
     # Example usage
-    block_test = Block(None)
+    block_test = Block("control_ifelse", None)
     block_test.add_shape(BlockShape.Hat)
     block_test.add_shape(BlockShape.CBlock)
     block_test.add_shape(BlockShape.CBlock)

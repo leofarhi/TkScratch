@@ -1,7 +1,6 @@
 from importlib.resources import path
 from svgpathtools import parse_path, Line, CubicBezier, QuadraticBezier, Arc
 from PIL import Image, ImageDraw, ImageFont
-#import svg_path_transform as svg_transform
 
 class ViewBox:
     def __init__(self, x, y, scaleW, scaleH):
@@ -39,7 +38,6 @@ class PathSVG(WidgetSVG):
         self.border_color = border_color
         self.fill_color = fill_color
         self.viewbox = viewbox if isinstance(viewbox, ViewBox) and viewbox != None else ViewBox(0, 0, 1, 1)
-        self.path.transformed(self.viewbox.x, self.viewbox.y, self.viewbox.scaleW, self.viewbox.scaleH)
         self.stroke_width = stroke_width
         self.curve_resolution = curve_resolution
         self._region = self._get_region()
@@ -194,14 +192,15 @@ if __name__ == "__main__":
     d= "m 0,0 c 25,-22 71,-22 96,0 H 139.15625 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48\
         c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,\
             -2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"
+    d = "m 0 17 c 25 -22 71 -22 96 0 h 142 a 4 4 0 0 1 4 4 v 2 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 20 a 4 4 0 0 0 -4 4 v 4 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 h 137 a 4 4 0 0 1 4 4 v 0 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 20 a 4 4 0 0 0 -4 4 v 7 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 h 84 a 4 4 0 0 1 4 4 v 0 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 z"
     svg = SVG()
     svg.add_widget(PathSVG(
         d,
         border_color= "#cf8b17",
         fill_color="#ffab19",  # Semi-transparent red
-        viewbox=ViewBox(1, 0, 1, 1),
+        viewbox=ViewBox(1, 0, 3, 3),
         stroke_width=2,
-        curve_resolution=10
+        curve_resolution=20
         )
     )
     svg.add_widget(TextSVG(
