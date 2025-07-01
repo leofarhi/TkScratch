@@ -1,14 +1,14 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox
-from engine.Sound import Sound, test_sound
+from engine.Sound import Sound
+from ui.tabs.sounds.center_area import SoundsArea
 
 class SoundsTab(ctk.CTkFrame):
     def __init__(self, app, master, **kwargs):
         super().__init__(master, **kwargs)
         self.app = app
 
-        self.data_list = []   # Données Sound
         self.widget_list = []  # Widgets
         self.selected_index = None
 
@@ -31,13 +31,22 @@ class SoundsTab(ctk.CTkFrame):
         )
         self.add_btn.pack(pady=15)
 
-        self.add_sound()
-        self.add_sound()
-
         self.app.add_refresh(self.sync_widgets)
+        self.app.on_game_object_selected(self.on_game_object_selected)
+
+    def on_game_object_selected(self, obj):
+        self.selected_index = None
+        self.sync_widgets()
+        if obj and obj.sounds:
+            self.select_sound(0)
+
+    @property
+    def data_list(self):
+        obj = self.app.project.current_object
+        return obj.sounds if obj else []
 
     def add_sound(self):
-        sound = test_sound
+        sound = Sound("Example Sound", "tests/test.wav")
         self.data_list.append(sound)
         self.sync_widgets()
         self.select_sound(len(self.data_list)-1)
@@ -51,7 +60,7 @@ class SoundsTab(ctk.CTkFrame):
             else:
                 self.selected_index = None
 
-    def sync_widgets(self):
+    def sync_widgets(self, *args, **kwargs):
         while len(self.widget_list) < len(self.data_list):
             w = self._create_sound_widget(len(self.widget_list))
             self.widget_list.append(w)
@@ -127,6 +136,7 @@ class SoundsTab(ctk.CTkFrame):
             self._apply_default_style(self.widget_list[self.selected_index])
         self.selected_index = index
         self._apply_selected_style(self.widget_list[index])
+        SoundsArea.Instance.set_sound(self.data_list[index])
 
     def _apply_selected_style(self, w):
         w["frame"].configure(fg_color=["#a46ff2", "#7c4cd8"], border_color=["#a46ff2", "#7c4cd8"])

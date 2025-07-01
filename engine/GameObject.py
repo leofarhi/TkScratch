@@ -8,5 +8,6 @@ class GameObject:
         self.size = size
         self.is_background = is_background
         self.sprites = []
+        self.sounds = []
         self.current_sprite = 0
         self.code = []

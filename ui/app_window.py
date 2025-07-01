@@ -39,6 +39,10 @@ test_Project.game_objects[0].sprites.append(random_sprite())
 test_Project.game_objects[0].sprites.append(random_sprite())
 test_Project.game_objects[1].sprites.append(random_sprite())
 test_Project.game_objects[1].sprites.append(random_sprite())
+
+test_Project.game_objects[1].sounds.append(Sound("Sound1", "tests/test.wav"))
+test_Project.game_objects[2].sounds.append(Sound("Sound2", "tests/test2.wav"))
+test_Project.game_objects[2].sounds.append(Sound("Sound1", "tests/test.wav"))
 ####################################
 
 class ScratchApp(ctk.CTk):

@@ -17,7 +17,129 @@ boolean = "M 120 0 L 140 20 L 120 40 H 20 L 0 20 L 20 0 Z"
 
 
 
+from enum import Enum
 
+class Shape(Enum):
+    Hat = "hat"
+    StackTop = "stack_top"
+    StackBottom = "stack_bottom"
+    CBlock = "c_block"
+    Cap = "cap"
+    Reporter = "reporter"
+    Boolean = "boolean"
+
+SHAPES = {
+    Shape.Hat: "m 0 0 c 25 -22 71 -22 96 0 h $width a 4 4 0 0 1 4 4 v $height H 0 z",
+    Shape.StackTop: "m 0 4 a 4 4 0 0 1 4 -4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 h $width a 4 4 0 0 1 4 4 v $height H 0 z",
+    Shape.StackBottom: "m 0 0 h 149 v 4 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 z",
+    Shape.CBlock: "m 0 0 h 160 v 4 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 20 a 4 4 0 0 0 -4 4 v $space a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 h $width a 4 4 0 0 1 4 4 v $height H 0 z",
+    Shape.Cap: "m 0 0 h 149 v 4 a 4 4 0 0 1 -4 4 H 4 a 4 4 0 0 1 -4 -4 z",
+    Shape.Reporter: "m 55 0 H 55 a 20 20 0 0 1 0 40 H 20 A 20 20 0 0 1 20 0 z",
+    Shape.Boolean: "M 120 0 L 140 20 L 120 40 H 20 L 0 20 L 20 0 Z",
+}
+
+base_config = {
+    Shape.Hat: {"width": 43, "height": 8},
+    Shape.StackTop: {"width": 127, "height": 8},
+    Shape.CBlock: {"width": 92, "height": 8, "space": 16},
+}
+
+def clean_path(shape, path, is_first=False, is_last=False):
+    path = path.strip()
+    if shape == Shape.Hat:
+        if "H 0 z" in path:
+            path = path.replace("H 0 z", "").strip()
+    elif shape == Shape.StackBottom:
+        if path.startswith("m 0 0 h 149 v 4"):
+            path = path[len("m 0 0 h 149 v 4"):].strip()
+    elif shape == Shape.Cap:
+        if path.startswith("m 0 0 h 149 v 4"):
+            path = path[len("m 0 0 h 149 v 4"):].strip()
+    elif shape == Shape.CBlock:
+        if path.startswith("m 0 0 h 160 v 4"):
+            path = path[len("m 0 0 h 160 v 4"):].strip()
+    if not is_first:
+        if path.startswith("m") or path.startswith("M"):
+            path = path.split(" ", 2)[2]
+    if not is_last:
+        # pour StackTop et CBlock, remplacer fermeture par v 4
+        if "H 0 z" in path:
+            path = path.replace("H 0 z", "").strip()
+        elif path.endswith("z"):
+            path = path[:-1].strip()
+    return path
+
+def combine(shapes, config = None):
+    config_idx = 0
+    parts = []
+    count = len(shapes)
+    for idx, shape in enumerate(shapes):
+        raw = SHAPES[shape]
+        part = clean_path(
+            shape,
+            raw,
+            is_first=(idx == 0),
+            is_last=(idx == count - 1)
+        )
+        shape_config = base_config.get(shape, {})
+        if config and config_idx < len(config):
+            for key in shape_config.keys():
+                if key in config[config_idx]:
+                    shape_config[key] = config[config_idx][key]
+            config_idx += 1
+        for key, value in shape_config.items():
+            value = max(value - 8, 0)
+            part = part.replace(f"${key}", str(value))
+        parts.append(part)
+    return " ".join(parts)
+
+config = [
+    {"width": 150, "height": 10},
+    {"width": 145, "height": 8, "space": 12}
+]
+
+# ✅ Test complexe :
+print(combine([Shape.StackTop, Shape.CBlock, Shape.Cap], config))
+print()
+
+def sp_shape_size(shape, width, height):
+    if shape == Shape.Reporter:
+        width = max(width, 0) + 40
+        height = max(height, 0) + 40
+        r = 20
+        x0 = max(r, (width - 40) / 2)
+        x1 = width - x0
+        w = x1 - x0
+        translation_x = height/2
+        return f"m {translation_x:.2f} 0 H {(w + translation_x):.2f} a {r} {r} 0 0 1 0 {height:.2f} H {translation_x:.2f} A {r} {r} 0 0 1 {translation_x:.2f} 0 z"
+    elif shape == Shape.Boolean:
+        point_depth = 20
+        width = max(width, 0) + point_depth * 2
+        height = max(height, 0) + point_depth * 2
+        mid_height = height / 2
+
+        start_x = width - point_depth
+        tip_x = width
+        base_x = point_depth
+
+        return (
+            f"M {start_x:.2f} 0 "
+            f"L {tip_x:.2f} {mid_height:.2f} "
+            f"L {start_x:.2f} {height:.2f} "
+            f"H {base_x:.2f} "
+            f"L 0 {mid_height:.2f} "
+            f"L {base_x:.2f} 0 Z"
+        )
+
+
+# ✅ Exemples
+print(sp_shape_size(Shape.Boolean, width=26, height=0))
+print()
+print(sp_shape_size(Shape.Boolean, width=0, height=0))
+print()
+print(sp_shape_size(Shape.Boolean, width=50, height=0))
+
+quit()
 
 
 

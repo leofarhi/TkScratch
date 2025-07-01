@@ -34,4 +34,3 @@ class Sound:
         except:
             return np.zeros(points)
         
-test_sound = Sound("Example Sound", "tests/test.wav")
