@@ -3,8 +3,6 @@ from modules.config import Settings
 from modules.i18n import LanguageManager
 from ui.app_window import ScratchApp
 
-import ui.block.block
-
 if __name__ == "__main__":
     settings = Settings()
     language_manager = LanguageManager()

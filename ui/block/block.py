@@ -21,9 +21,9 @@ SHAPES = {
 }
 
 base_config = {
-    BlockShape.Hat: {"width": 43, "height": 8},
-    BlockShape.StackTop: {"width": 127, "height": 8},
-    BlockShape.CBlock: {"width": 92, "height": 8, "space": 16},
+    BlockShape.Hat: {"width": 43, "height": 16},
+    BlockShape.StackTop: {"width": 127, "height": 16},
+    BlockShape.CBlock: {"width": 92, "height": 16, "space": 16},
 }
 
 class BlockPartType(Enum):
@@ -52,17 +52,17 @@ class Branch:
         return new_branch
 
 class Block:
-    def __init__(self, id, master):
+    def __init__(self, id, master, fill_color = "#ffab19", stroke_color = "#cf8b17"):
         self.master = master
         self.id = id
         self.shape = []
-        self.fill_color = "#ffab19"
-        self.stroke_color = "#cf8b17"
+        self.fill_color = fill_color
+        self.stroke_color = stroke_color
         self.branches = []
         self.next_block = None
 
     def clone(self):
-        new_block = Block(self.id, self.master)
+        new_block = Block(self.id, self.master, self.fill_color, self.stroke_color)
         new_block.shape = self.shape.copy()
         new_block.fill_color = self.fill_color
         new_block.stroke_color = self.stroke_color
@@ -114,8 +114,8 @@ class Block:
             path=path_svg,
             fill_color=self.fill_color,
             border_color=self.stroke_color,
-            stroke_width=2,
-            viewbox=ViewBox(0, 0, 3, 3),
+            stroke_width=3,
+            viewbox=ViewBox(3, 0, 3, 3),
         ))
         return svg
 
