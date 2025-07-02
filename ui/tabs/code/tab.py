@@ -2,7 +2,9 @@ import customtkinter as ctk
 import tkinter as tk
 from PIL import Image, ImageTk
 from ui.widgets.VerticalTabview import VerticalTabview
+from ui.tabs.code.center_area import CodeArea
 from ui.block.blocks import blocks_available
+from functools import partial
 
 
 class DragPopup:
@@ -86,15 +88,16 @@ class CodeTab(ctk.CTkFrame):
                 )
                 btn.pack(pady=5, anchor="w")
 
-                btn.bind("<ButtonPress-1>", lambda e, img=img: self.start_drag(e, img))
+                btn.bind("<ButtonPress-1>", partial(self.start_drag, img=img, block=block))
                 btn.bind("<B1-Motion>", self.do_drag)
                 btn.bind("<ButtonRelease-1>", self.stop_drag)
 
-    def start_drag(self, event, img):
+    def start_drag(self, event, img, block):
         """Démarre le drag en calculant l'offset"""
         if img.mode != "RGBA":
             img = img.convert("RGBA")
         self.drag_popup = DragPopup(self.app, img)
+        self.drag_block = block
 
         # Calcul de l'offset clic → image
         self.drag_offset_x = event.x
@@ -110,7 +113,23 @@ class CodeTab(ctk.CTkFrame):
             self.drag_popup.move(x, y, self.drag_offset_x, self.drag_offset_y)
 
     def stop_drag(self, event):
-        """Stoppe le drag"""
+        """Stoppe le drag et fait le drop sur le canvas"""
         if self.drag_popup:
+            # Coords absolues
+            abs_x = self.app.winfo_pointerx()
+            abs_y = self.app.winfo_pointery()
+
+            # Récupère le canvas
+            canvas = CodeArea.Instance.canvas
+
+            # Convertit en coords locales au canvas
+            canvas_x = abs_x - canvas.winfo_rootx() - self.drag_offset_x
+            canvas_y = abs_y - canvas.winfo_rooty() - self.drag_offset_y
+
+            # Drop réel
+            CodeArea.Instance.drop_block(self.drag_block.clone(), canvas_x, canvas_y)
+
+            # Nettoie le popup
             self.drag_popup.destroy()
             self.drag_popup = None
+

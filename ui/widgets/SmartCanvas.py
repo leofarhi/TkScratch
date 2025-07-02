@@ -194,9 +194,9 @@ class SmartCanvas(tk.Canvas):
 
 
     def _update_loop(self):
-        if self.image is None or self.surface is None:
-            return self.after(16, self._update_loop)
+        if self.image is None or self.surface is None or not self.winfo_ismapped():
+            return self.after(250, self._update_loop)
         if self.callback:
             self.callback(self)
         self.input.reset()
-        self.after(16, self._update_loop)
+        self.after(20, self._update_loop)
